@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+"use client"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import type React from "react"
+import { Provider } from "react-redux"
+import { store } from "./store/store"
+import { UserProvider, useUser } from "./contexts/UserContext"
+import Login from "./components/Login/Login"
+import DoctorDashboard from "./components/Doctor/DoctorDashboard"
+import ClientDashboard from "./components/Client/ClientDashboard"
+import SecretaryDashboard from "./components/Secretary/SecretaryDashboard"
+import "./App.css"
+
+const AppContent: React.FC = () => {
+  const { user } = useUser()
+
+  if (!user) {
+    return <Login />
+  }
+
+  switch (user.type) {
+    case "Doctor":
+      return <DoctorDashboard />
+    case "Client":
+      return <ClientDashboard />
+    case "Secretary":
+      return <SecretaryDashboard />
+    default:
+      return <Login />
+  }
 }
 
-export default App;
+const App: React.FC = () => {
+  return (
+    <Provider store={store}>
+      <UserProvider>
+        <div className="App">
+          <AppContent />
+        </div>
+      </UserProvider>
+    </Provider>
+  )
+}
+
+export default App
