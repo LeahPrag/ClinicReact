@@ -23,37 +23,43 @@ const ClientDashboard: React.FC = () => {
 
 
 
+  const handleMakeAppointment = async (
+    queueId: number,
+    doctorId: number,
+    appointmentDate: string
+  ) => {
+    if (!user?.id) return;
 
-const handleMakeAppointment = async (queueId: number, doctorId: number) => {
-  if (!user?.id) return;
+    try {
+      setSelectedQueue(queueId);
 
-  try {
-    setSelectedQueue(queueId);
-    
-    // Transform doctor ID to API format
-    const apiDoctorId = `1234567${doctorId}`;
-    
-    const today = new Date();
-    const formattedDate = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-    
-    const response = await dispatch(
-      makeAppointment({
-        idDoctor: apiDoctorId, // Use transformed ID
-        idClient: user.id,
-        date: formattedDate,
-        hour: today.getHours(),
-      }),
-    ).unwrap();
+      const apiDoctorId = `1234567${doctorId}`;
 
-    alert(response);
-    dispatch(fetchAvailableQueuesForToday());
-  } catch (error: any) {
-    console.error("Appointment error:", error);
-    alert(`שגיאה בקביעת התור: ${error.message}`);
-  } finally {
-    setSelectedQueue(null);
-  }
-};
+      const dateObj = new Date(appointmentDate);
+
+      const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}.${(dateObj.getMonth() + 1).toString().padStart(2, '0')}.${dateObj.getFullYear()}`;
+
+      const hour = dateObj.getHours();
+
+      const response = await dispatch(
+        makeAppointment({
+          idDoctor: apiDoctorId,
+          idClient: user.id,
+          date: formattedDate,
+          hour: hour,
+        }),
+      ).unwrap();
+
+      alert(response);
+      dispatch(fetchAvailableQueuesForToday());
+    } catch (error: any) {
+      console.error("Appointment error:", error);
+      alert(`שגיאה בקביעת התור: ${error.message}`);
+    } finally {
+      setSelectedQueue(null);
+    }
+  };
+
 
   return (
     <Layout title={`ברוך הבא, ${user?.name}`}>
@@ -108,11 +114,14 @@ const handleMakeAppointment = async (queueId: number, doctorId: number) => {
                   <div className="queue-actions">
                     <button
                       className="book-btn"
-                      onClick={() => handleMakeAppointment(queue.queueId, queue.doctorId)}
+                      onClick={() =>
+                        handleMakeAppointment(queue.queueId, queue.doctorId, queue.appointmentDate)
+                      }
                       disabled={selectedQueue === queue.queueId}
                     >
                       {selectedQueue === queue.queueId ? "מזמין..." : "קביעת תור"}
                     </button>
+
                   </div>
                 </div>
               ))}
