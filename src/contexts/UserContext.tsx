@@ -59,10 +59,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Get user name based on type
       if (userType === "Doctor") {
         const name = await authService.getDoctorName(id);
-        newUser.name = name || `רופא ${id}`;
+        newUser.name = name ;
       } else if (userType === "Client") {
         const name = await authService.getClientName(id);
-        newUser.name = name || `מטופל ${id}`;
+        newUser.name = name ;
       } else if (userType === "Secretary") {
         newUser.name = "מזכירה";
       }

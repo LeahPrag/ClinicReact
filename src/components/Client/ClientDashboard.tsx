@@ -24,34 +24,6 @@ const ClientDashboard: React.FC = () => {
 
 
 
-// const handleMakeAppointment = async (queueId: number, doctorId: number) => {
-//   if (!user?.id) return;
-
-//   try {
-//     setSelectedQueue(queueId);
-    
-//     // Format date as DD.MM.YYYY
-//     const today = new Date();
-//     const formattedDate = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-    
-//     const response = await dispatch(
-//       makeAppointment({
-//         idDoctor: doctorId.toString(),
-//         idClient: user.id,
-//         date: formattedDate,
-//         hour: today.getHours(),
-//       }),
-//     ).unwrap();
-
-//     alert(response); // Show the success message from backend
-//     dispatch(fetchAvailableQueuesForToday());
-//   } catch (error: any) {
-//     console.error("Appointment error:", error);
-//     alert(`שגיאה בקביעת התור: ${error.message}`);
-//   } finally {
-//     setSelectedQueue(null);
-//   }
-// };
 const handleMakeAppointment = async (queueId: number, doctorId: number) => {
   if (!user?.id) return;
 
