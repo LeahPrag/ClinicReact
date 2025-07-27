@@ -21,14 +21,14 @@ class AuthService {
 }
 
 async getDoctorName(id: string): Promise<string> {
-    const res = await fetch(`${API_BASE_URL}/Doctor/GetClientName?id=${id}`);
+    const res = await fetch(`${API_BASE_URL}Doctor/GetDoctorName?id=${id}`);
     if (!res.ok) throw new Error("Failed to fetch doctor name");
     const text = await res.text();  
     console.log("Response text:", text);
     return text.trim();
 }
 async getClientName(id: string): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/Clini/GetClientName?id=${id}`);
+  const res = await fetch(`${API_BASE_URL}Clinic/GetClientName?id=${id}`);
   if (!res.ok) throw new Error("Failed to fetch client name");
   const text = await res.text();  
   console.log("Response text:", text);

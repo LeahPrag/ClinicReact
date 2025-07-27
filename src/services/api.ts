@@ -183,19 +183,24 @@ async makeAppointment(idDoctor: string, idClient: string, date: string, hour: nu
 // In api.ts
 async getAvailableQueuesForDayAndSpec(
   date: string,
-  doctorName?: string,
-  specialization?: string | null
+  firstName?: string,
+  lastName?: string
 ): Promise<M_AvailableQueue[]> {
   const params = new URLSearchParams();
   params.append("date", date);
-  if (doctorName) params.append("doctorName", doctorName);
-  if (specialization) params.append("specialization", specialization);
+  
+  // Only append if values exist
+  if (firstName && firstName.trim()) params.append("firstName", firstName.trim());
+  if (lastName && lastName.trim()) params.append("lastName", lastName.trim());
   
   const url = `${API_BASE_URL}/Clinic/availableQueuesForDay?${params.toString()}`;
+  console.log("Request URL:", url); // Debug log
+  
   const response = await fetch(url);
   
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("API Error:", errorText); // Debug log
     throw new Error(errorText || "Failed to fetch available queues");
   }
   

@@ -40,31 +40,21 @@ export const makeAppointment = createAsyncThunk<
   return await apiService.makeAppointment(idDoctor, idClient, date, hour)
 })
 
-// export const fetchAvailableQueuesForDate = createAsyncThunk<
-//   M_AvailableQueue[],
-//   { date: string; specialization?: string | null }
-// >(
-//   "queue/fetchAvailableQueuesForDate",
-//   async ({ date, specialization }) => {
-//     return await apiService.getAvailableQueuesForDayAndSpec(date, specialization)
-//   }
-// )
-// In your queueSlice.ts
-// In queueSlice.ts
+
 export const fetchAvailableQueuesForDate = createAsyncThunk<
   M_AvailableQueue[],
   { 
     date: string;
-    doctorName?: string;
-    specialization?: string | null;
+    firstName?: string;
+    lastName?: string;
   }
 >(
   "queue/fetchAvailableQueuesForDate",
-  async ({ date, doctorName, specialization }) => {
+  async ({ date, firstName, lastName }) => {
     return await apiService.getAvailableQueuesForDayAndSpec(
       date,
-      doctorName,
-      specialization
+      firstName,
+      lastName
     );
   }
 );
@@ -112,6 +102,19 @@ const queueSlice = createSlice({
       .addCase(makeAppointment.fulfilled, (state) => {
         state.loading = false
       })
+      // Add this to your extraReducers in queueSlice.ts
+      .addCase(fetchAvailableQueuesForDate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAvailableQueuesForDate.fulfilled, (state, action) => {
+        state.loading = false;
+        state.availableQueues = action.payload;
+      })
+      .addCase(fetchAvailableQueuesForDate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch queues by date";
+      });
       
   },
 })
