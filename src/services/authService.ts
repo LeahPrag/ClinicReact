@@ -1,6 +1,6 @@
 import { apiService } from "./api"
 import type { UserType } from "../types"
-const API_BASE_URL = "http://localhost:5015/api/Clinic"
+const API_BASE_URL = "http://localhost:5015/api/"
 class AuthService {
 
   async getUserType(id: string): Promise<UserType | null> {
@@ -21,16 +21,14 @@ class AuthService {
 }
 
 async getDoctorName(id: string): Promise<string> {
-  try {
-    const name = await apiService.getDoctorName(id) // זו הפונקציה ב-apiService שמחזירה טקסט
-    return name || ""
-  } catch (error) {
-    console.error("error indoctor name", error)
-    return ""
-  }
+    const res = await fetch(`${API_BASE_URL}/Doctor/GetClientName?id=${id}`);
+    if (!res.ok) throw new Error("Failed to fetch doctor name");
+    const text = await res.text();  
+    console.log("Response text:", text);
+    return text.trim();
 }
 async getClientName(id: string): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/GetClientName?id=${id}`);
+  const res = await fetch(`${API_BASE_URL}/Clini/GetClientName?id=${id}`);
   if (!res.ok) throw new Error("Failed to fetch client name");
   const text = await res.text();  
   console.log("Response text:", text);
