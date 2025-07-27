@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ title, children, backgroundStyle }) => 
                   יציאה
                 </button>
               </div>
-            )}
+            )}n
           </div>
         </header>
         <main className="layout-main">
