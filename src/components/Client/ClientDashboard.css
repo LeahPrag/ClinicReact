@@ -265,3 +265,26 @@
     align-items: flex-start;
   }
 }
+/**/
+.specializations-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.specializations-buttons button {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 2px solid #4caf50;
+  background-color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.specializations-buttons button.selected,
+.specializations-buttons button:hover {
+  background-color: #4caf50;
+  color: white;
+}

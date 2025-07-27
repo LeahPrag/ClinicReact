@@ -1,5 +1,4 @@
 
-
 import type { M_Client, M_Doctor, M_ClinicQueue, M_AvailableQueue } from "../types"
 const API_BASE_URL = "http://localhost:5015/api"
 
@@ -57,27 +56,6 @@ class ApiService {
 
 
 
-// async makeAppointment(idDoctor: string, idClient: string, date: string, hour: number): Promise<any> {
-//   const url = new URL(`${API_BASE_URL}/Clinic/makeAppointment`);
-//   url.searchParams.append('idDoctor', idDoctor);
-//   url.searchParams.append('idClient', idClient);
-//   url.searchParams.append('date', date);
-//   url.searchParams.append('hour', hour.toString());
-
-//   const response = await fetch(url.toString(), {
-//     method: "POST",
-//     headers: {
-//       "accept": "*/*"  // Match Swagger's header
-//     }
-//   });
-
-//   if (!response.ok) {
-//     const errorText = await response.text();
-//     throw new Error(errorText || "Failed to make appointment");
-//   }
-
-//   return await response.text(); // Handle plain text response
-// }
 
 async makeAppointment(idDoctor: string, idClient: string, date: string, hour: number): Promise<string> {
   const url = new URL(`${API_BASE_URL}/Clinic/makeAppointment`);
@@ -146,9 +124,18 @@ async makeAppointment(idDoctor: string, idClient: string, date: string, hour: nu
     return this.request<M_ClinicQueue[]>(`/Doctor/DoctorQueuesForToday?idNumber=${idNumber}`)
   }
 
-  async getAvailableQueuesForSpecialization(specialization: string): Promise<any> {
-    return this.request<any>(`/Doctor/availableQueuesForASpezesilation?spezesilation=${specialization}`)
+  async getAvailableQueuesForSpecialization(specialization: string): Promise<M_ClinicQueue[]> {
+  const url = `${API_BASE_URL}/Doctor/availableQueuesForASpezesilation?spezesilation=${encodeURIComponent(specialization)}`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || "Failed to fetch queues by specialization")
   }
+
+  return await response.json()
+}
+
 
   async getAvailableQueuesForToday(): Promise<M_AvailableQueue[]> {
     return this.request<M_AvailableQueue[]>("/Doctor/AvailableQueuesForToday")
@@ -179,6 +166,41 @@ async makeAppointment(idDoctor: string, idClient: string, date: string, hour: nu
       body: JSON.stringify(doctor),
     })
   }
+  
+//   async getAvailableQueuesForDayAndSpec(date: string, specialization?: string | null): Promise<M_AvailableQueue[]> {
+//   const params = new URLSearchParams()
+//   params.append("date", date)
+//   if (specialization) params.append("specialization", specialization)
+//   const url = `${API_BASE_URL}/Clinic/availableQueuesForDay?${params.toString()}`
+//   const response = await fetch(url)
+//   if (!response.ok) {
+//     const errorText = await response.text()
+//     throw new Error(errorText || "Failed to fetch queues by date and specialization")
+//   }
+//   return await response.json()
+// }
+
+// In api.ts
+async getAvailableQueuesForDayAndSpec(
+  date: string,
+  doctorName?: string,
+  specialization?: string | null
+): Promise<M_AvailableQueue[]> {
+  const params = new URLSearchParams();
+  params.append("date", date);
+  if (doctorName) params.append("doctorName", doctorName);
+  if (specialization) params.append("specialization", specialization);
+  
+  const url = `${API_BASE_URL}/Clinic/availableQueuesForDay?${params.toString()}`;
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to fetch available queues");
+  }
+  
+  return await response.json();
+}
 }
 
 export const apiService = new ApiService()
