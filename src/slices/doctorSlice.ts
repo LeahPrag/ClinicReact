@@ -59,6 +59,14 @@ export const deleteDoctor = createAsyncThunk<string, string>(
   }
 )
 
+export const updateDoctor = createAsyncThunk<M_Doctor, UpdateDoctorDto>(
+  "doctor/updateDoctor",
+  async (updatedDoctor) => {
+    const updated = await apiService.updateDoctor(updatedDoctor)
+    return updated as M_Doctor
+  }
+)
+
 const doctorSlice = createSlice({
   name: "doctor",
   initialState,
@@ -100,6 +108,12 @@ const doctorSlice = createSlice({
       // Delete doctor
       .addCase(deleteDoctor.fulfilled, (state, action) => {
         state.doctors = state.doctors.filter((d) => d.idNumber !== action.payload)
+      })
+      .addCase(updateDoctor.fulfilled, (state, action) => {
+        const index = state.doctors.findIndex((d) => d.idNumber === action.payload.idNumber)
+        if (index !== -1) {
+          state.doctors[index] = action.payload
+        }
       })
   },
 })

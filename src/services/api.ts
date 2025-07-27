@@ -1,5 +1,5 @@
 
-import type { M_Client, M_Doctor, M_ClinicQueue, M_AvailableQueue } from "../types"
+import type { M_Client, M_Doctor, M_ClinicQueue, M_AvailableQueue,UpdateDoctorDto } from "../types"
 const API_BASE_URL = "http://localhost:5015/api"
 
 class ApiService {
@@ -160,27 +160,13 @@ async makeAppointment(idDoctor: string, idClient: string, date: string, hour: nu
     })
   }
 
-  async updateDoctor(doctor: M_Doctor): Promise<M_Doctor> {
+  async updateDoctor(doctor: UpdateDoctorDto): Promise<M_Doctor> {
     return this.request<M_Doctor>("/Doctor/updateDoctor", {
       method: "PUT",
       body: JSON.stringify(doctor),
     })
   }
   
-//   async getAvailableQueuesForDayAndSpec(date: string, specialization?: string | null): Promise<M_AvailableQueue[]> {
-//   const params = new URLSearchParams()
-//   params.append("date", date)
-//   if (specialization) params.append("specialization", specialization)
-//   const url = `${API_BASE_URL}/Clinic/availableQueuesForDay?${params.toString()}`
-//   const response = await fetch(url)
-//   if (!response.ok) {
-//     const errorText = await response.text()
-//     throw new Error(errorText || "Failed to fetch queues by date and specialization")
-//   }
-//   return await response.json()
-// }
-
-// In api.ts
 async getAvailableQueuesForDayAndSpec(
   date: string,
   firstName?: string,
