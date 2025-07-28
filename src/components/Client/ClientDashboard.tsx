@@ -8,14 +8,14 @@ import {
   fetchAvailableQueuesForSpecialization,
   fetchAvailableQueuesForDate,
   makeAppointment,
-  fetchClientAppointments,
+  fetchClientAppointments
 } from "../../slices/queueSlice";
 import Layout from "../Layout/Layout";
 import "./ClientDashboard.css";
 
 const specializations = [
   { value: "Gynecologist", label: "Gynecology" },
-  { value: "ENT", label: "ENT" },
+  { value: "ENT", label: "Ear, Nose, and Throat" },
   { value: "Pediatrician", label: "Pediatrics" },
   { value: "Adult", label: "Adults" },
 ];
@@ -31,10 +31,66 @@ const ClientDashboard: React.FC = () => {
   const [doctorFirstName, setDoctorFirstName] = useState("");
   const [doctorLastName, setDoctorLastName] = useState("");
   const [showDoctorFields, setShowDoctorFields] = useState(false);
+  const [searchedDoctorName, setSearchedDoctorName] = useState<string>("");
 
   const formatDateForServer = (dateStr: string): string => {
     const [year, month, day] = dateStr.split("-");
     return `${day}.${month}.${year}`;
+  };
+
+  const clearDoctorSearch = () => {
+    setDoctorFirstName("");
+    setDoctorLastName("");
+    setShowDoctorFields(false);
+    setSearchedDoctorName("");
+  };
+
+  const getDoctorDisplayName = (queue: any) => {
+    // אם חיפשנו לפי שם רופא ויש לנו תוצאות, נציג את השם שחיפשנו
+    if (searchedDoctorName && (doctorFirstName || doctorLastName)) {
+      return searchedDoctorName;
+    }
+    
+    // אחרת, ננסה לקבל שם מהנתונים
+    const firstName = queue.doctorFirstName || queue.DoctorFirstName || '';
+    const lastName = queue.doctorLastName || queue.DoctorLastName || '';
+    
+    if (firstName && lastName) {
+      return `Dr. ${firstName} ${lastName}`;
+    } else if (firstName) {
+      return `Dr. ${firstName}`;
+    } else if (lastName) {
+      return `Dr. ${lastName}`;
+    }
+    
+    return `Doctor #${queue.doctorId || queue.DoctorId}`;
+  };
+
+  const refreshData = async () => {
+    try {
+      if (user?.id) {
+        await dispatch(fetchClientAppointments(user.id)).unwrap();
+      }
+      
+      // רענון התורים הזמינים - תמיד עם חיפוש לפי שם רופא אם זמין
+      if (selectedDate) {
+        const formattedDate = formatDateForServer(selectedDate);
+        await dispatch(
+          fetchAvailableQueuesForDate({
+            date: formattedDate,
+            firstName: doctorFirstName.trim() || undefined,
+            lastName: doctorLastName.trim() || undefined,
+          })
+        ).unwrap();
+      } else if (selectedSpecialization) {
+        // גם בחיפוש לפי התמחות, נכלול חיפוש רופא אם יש
+        await dispatch(fetchAvailableQueuesForSpecialization(selectedSpecialization)).unwrap();
+      } else {
+        await dispatch(fetchAvailableQueuesForToday()).unwrap();
+      }
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
   };
 
   useEffect(() => {
@@ -45,6 +101,8 @@ const ClientDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!selectedDate) {
+      // כשאין תאריך, נקה את שם הרופא הנשמר
+      setSearchedDoctorName("");
       if (selectedSpecialization) {
         dispatch(fetchAvailableQueuesForSpecialization(selectedSpecialization));
       } else {
@@ -55,6 +113,15 @@ const ClientDashboard: React.FC = () => {
 
   const handleSearchByDate = () => {
     if (!selectedDate) return;
+    
+    // שמירת שם הרופא שחיפשנו לתצוגה
+    if (doctorFirstName || doctorLastName) {
+      const searchName = `Dr. ${doctorFirstName} ${doctorLastName}`.trim();
+      setSearchedDoctorName(searchName);
+    } else {
+      setSearchedDoctorName("");
+    }
+    
     const formattedDate = formatDateForServer(selectedDate);
     dispatch(
       fetchAvailableQueuesForDate({
@@ -87,14 +154,10 @@ const ClientDashboard: React.FC = () => {
       ).unwrap();
 
       alert(response);
-      if (selectedSpecialization) {
-        dispatch(fetchAvailableQueuesForSpecialization(selectedSpecialization));
-      } else {
-        dispatch(fetchAvailableQueuesForToday());
-      }
-      dispatch(fetchClientAppointments(user.id));
+      await refreshData();
     } catch (error: any) {
-      alert(`Error making appointment: ${error.message}`);
+      console.error('Error making appointment:', error);
+      alert(`Error scheduling appointment: ${error.message}`);
     } finally {
       setSelectedQueue(null);
     }
@@ -102,128 +165,183 @@ const ClientDashboard: React.FC = () => {
 
   return (
     <Layout title={`Welcome, ${user?.name}`}>
-      <div className="client-dashboard" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <section className="welcome-section glass-card" style={{ padding: "1rem" }}>
-          <h2>Hello {user?.name}</h2>
-          <p>Here you can schedule appointments and manage your treatments</p>
+      <div className="client-dashboard">
+        <section className="welcome-section">
+          <div className="welcome-card">
+            <div className="welcome-icon">👋</div>
+            <h2>Hello {user?.name}</h2>
+            <p>Here you can schedule appointments and manage your treatments</p>
+          </div>
         </section>
 
-        <section className="search-section glass-card" style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-            <div>
-              <label htmlFor="date-select">Select Date:</label>
+        <section className="search-section">
+          <div className="search-controls">
+            <div className="search-field">
+              <label htmlFor="date-select">Date:</label>
               <input
                 type="date"
                 id="date-select"
+                className="search-input"
                 value={selectedDate ?? ""}
                 onChange={(e) => setSelectedDate(e.target.value || null)}
-                style={{ marginLeft: 8, padding: 4 }}
               />
             </div>
 
-            <button onClick={() => setShowDoctorFields((v) => !v)} style={{ padding: "6px 12px", cursor: "pointer" }}>
-              {showDoctorFields ? "Hide Doctor Fields" : "Search by Doctor Name"}
+            <div className="search-field">
+              <label htmlFor="specialization-select">Specialization:</label>
+              <select
+                id="specialization-select"
+                className="search-input"
+                value={selectedSpecialization ?? ""}
+                onChange={(e) => setSelectedSpecialization(e.target.value || null)}
+              >
+                <option value="">All Specializations</option>
+                {specializations.map((spec) => (
+                  <option key={spec.value} value={spec.value}>
+                    {spec.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              className="toggle-doctor-btn"
+              onClick={() => setShowDoctorFields(prev => !prev)}
+            >
+              {showDoctorFields ? "Hide Doctor Search" : "Search by Doctor"}
             </button>
 
             <button
+              className={`search-btn ${!selectedDate ? 'disabled' : ''}`}
               onClick={handleSearchByDate}
               disabled={!selectedDate}
-              style={{ padding: "6px 12px", cursor: selectedDate ? "pointer" : "not-allowed" }}
             >
               Search
             </button>
           </div>
 
           {showDoctorFields && (
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: 8 }}>
+            <div className="doctor-fields">
               <input
                 type="text"
+                className="search-input"
                 placeholder="Doctor's First Name"
                 value={doctorFirstName}
                 onChange={(e) => setDoctorFirstName(e.target.value)}
-                style={{ padding: 6, flex: "1 1 200px" }}
               />
               <input
                 type="text"
+                className="search-input"
                 placeholder="Doctor's Last Name"
                 value={doctorLastName}
                 onChange={(e) => setDoctorLastName(e.target.value)}
-                style={{ padding: 6, flex: "1 1 200px" }}
               />
+              <button className="clear-btn" onClick={clearDoctorSearch}>
+                Clear
+              </button>
             </div>
           )}
-
-          <div>
-            <label htmlFor="specialization-select">Select Specialization:</label>
-            <select
-              id="specialization-select"
-              value={selectedSpecialization ?? ""}
-              onChange={(e) => setSelectedSpecialization(e.target.value || null)}
-              style={{ marginLeft: 8, padding: 6, minWidth: 150 }}
-            >
-              <option value="">All Specializations</option>
-              {specializations.map((spec) => (
-                <option key={spec.value} value={spec.value}>
-                  {spec.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </section>
 
-        <section className="available-queues-section glass-card" style={{ padding: "1rem", maxHeight: "350px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <h3 style={{ marginBottom: "0.5rem" }}>
+        <section className="appointments-section">
+          <h3 className="section-title">
             {selectedSpecialization
               ? `Available Appointments - ${specializations.find((s) => s.value === selectedSpecialization)?.label || selectedSpecialization}`
               : "Available Appointments"}
             {selectedDate && ` - ${new Date(selectedDate).toLocaleDateString("en-US")}`}
+            {searchedDoctorName && ` - ${searchedDoctorName}`}
           </h3>
 
-          {loading ? (
-            <p>Loading available appointments...</p>
-          ) : availableQueues.length === 0 ? (
-            <p>No available appointments</p>
-          ) : (
-            availableQueues.map((queue) => (
-              <div key={queue.queueId} style={{ border: "1px solid #ccc", padding: "0.5rem", borderRadius: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div>
-                    <strong>Date:</strong> {new Date(queue.appointmentDate).toLocaleDateString("en-US")} <strong>Time:</strong>{" "}
-                    {new Date(queue.appointmentDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                  <div>
-                    <strong>Doctor ID:</strong> {queue.doctorId} | <strong>Queue ID:</strong> {queue.queueId}
-                  </div>
+          <div className="appointments-container">
+            {loading ? (
+              <div className="loading-container">
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <span>Loading available appointments...</span>
                 </div>
-                <button
-                  disabled={selectedQueue === queue.queueId}
-                  onClick={() => handleMakeAppointment(queue.queueId, queue.doctorId, queue.appointmentDate)}
-                  style={{ padding: "6px 12px", cursor: selectedQueue === queue.queueId ? "not-allowed" : "pointer", backgroundColor: "#4caf50", color: "white", border: "none", borderRadius: 4 }}
-                >
-                  {selectedQueue === queue.queueId ? "Booking..." : "Book Appointment"}
-                </button>
               </div>
-            ))
-          )}
+            ) : availableQueues.length === 0 ? (
+              <div className="no-appointments">
+                <div className="no-appointments-icon">📅</div>
+                <p>No available appointments</p>
+              </div>
+            ) : (
+              <div className="appointments-list">
+                {availableQueues.map((queue) => (
+                  <div key={queue.queueId} className="appointment-card">
+                    <div className="appointment-info">
+                      <div className="appointment-details">
+                        <div className="appointment-datetime">
+                          <span className="date">
+                            {new Date(queue.appointmentDate).toLocaleDateString("en-US")}
+                          </span>
+                          <span className="time">
+                            {new Date(queue.appointmentDate).toLocaleTimeString("en-US", { 
+                              hour: "2-digit", 
+                              minute: "2-digit" 
+                            })}
+                          </span>
+                        </div>
+                        <div className="doctor-name">
+                          {getDoctorDisplayName(queue)}
+                        </div>
+                        <div className="appointment-id">
+                          Appointment #{queue.queueId}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <button
+                      className={`book-btn ${selectedQueue === queue.queueId || loading ? 'disabled' : ''}`}
+                      disabled={selectedQueue === queue.queueId || loading}
+                      onClick={() => handleMakeAppointment(queue.queueId, queue.doctorId, queue.appointmentDate)}
+                    >
+                      {selectedQueue === queue.queueId ? "Scheduling..." : "Schedule"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
-        <section className="my-appointments-section glass-card" style={{ padding: "1rem" }}>
-          <h3>My Appointments</h3>
-          <div style={{ border: "1px dashed #aaa", borderRadius: 6, padding: "1rem", textAlign: "center", color: "#777" }}>
+        <section className="my-appointments-section">
+          <h3 className="section-title">My Appointments</h3>
+
+          <div className="appointments-container">
             {clientAppointments.length === 0 ? (
-              <p>No appointments scheduled</p>
+              <div className="no-appointments">
+                <div className="no-appointments-icon">📝</div>
+                <p>No appointments scheduled</p>
+              </div>
             ) : (
-              clientAppointments.map((appointment) => (
-                <div key={appointment.queueId} style={{ border: "1px solid #ccc", padding: "0.5rem", borderRadius: 6, marginBottom: "0.5rem" }}>
-                  <div>
-                    <strong>Date:</strong> {new Date(appointment.appointmentDate).toLocaleDateString("en-US")} <strong>Time:</strong>{" "}
-                    {new Date(appointment.appointmentDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+              <div className="appointments-list">
+                {clientAppointments.map((appointment) => (
+                  <div key={appointment.queueId} className="appointment-card my-appointment">
+                    <div className="appointment-info">
+                      <div className="appointment-details">
+                        <div className="appointment-datetime">
+                          <span className="date">
+                            {new Date(appointment.appointmentDate).toLocaleDateString("en-US")}
+                          </span>
+                          <span className="time">
+                            {new Date(appointment.appointmentDate).toLocaleTimeString("en-US", { 
+                              hour: "2-digit", 
+                              minute: "2-digit" 
+                            })}
+                          </span>
+                        </div>
+                        <div className="doctor-name">
+                          {getDoctorDisplayName(appointment)}
+                        </div>
+                        <div className="appointment-id">
+                          Appointment #{appointment.queueId}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <strong>Doctor ID:</strong> {appointment.doctorId} | <strong>Queue ID:</strong> {appointment.queueId}
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </section>

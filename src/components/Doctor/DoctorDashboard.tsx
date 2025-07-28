@@ -59,17 +59,16 @@ const DoctorDashboard: React.FC = () => {
         <div className="stats-grid">
           <div className="stat-card clients-today">
             <div className="stat-icon">👥</div>
-            <button
-              onClick={handleDeleteDay}
-              className="action-btn complete"
-              style={{ background: "linear-gradient(135deg, #e53935, #d32f2f)", color: "white" }}
-            >
-              Delete Workday
-            </button>
             <div className="stat-content">
               <h3>Clients Today</h3>
               <div className="stat-number">{clientsCount}</div>
             </div>
+            <button
+              onClick={handleDeleteDay}
+              className="delete-day-btn"
+            >
+              Delete Day
+            </button>
           </div>
 
           <div className="stat-card appointments-today">
@@ -89,35 +88,33 @@ const DoctorDashboard: React.FC = () => {
               <p>No appointments for today</p>
             </div>
           ) : (
-            <div className="appointments-grid">
-              {todayQueues.map((queue) => (
-                <div key={queue.queueId} className="appointment-card">
-                  <div className="appointment-header">
-                    <div className="appointment-time">
-                      {new Date(queue.appointmentDate).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+            <div className="appointments-container">
+              <div className="appointments-grid">
+                {todayQueues.map((queue) => (
+                  <div key={queue.queueId} className="appointment-card">
+                    <div className="appointment-header">
+                      <div className="appointment-time">
+                        {new Date(queue.appointmentDate).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                      <div className="appointment-status">Active</div>
                     </div>
-                    <div className="appointment-status">Active</div>
-                  </div>
-                  <div className="appointment-content">
-                    <div className="patient-info">
-                      <div className="patient-icon">👤</div>
-                      <div className="patient-details">
-                        <div className="patient-name">
-                          {queue.clientFirstName} {queue.clientLastName}
+                    <div className="appointment-content">
+                      <div className="patient-info">
+                        <div className="patient-icon">👤</div>
+                        <div className="patient-details">
+                          <div className="patient-name">
+                            {queue.clientFirstName} {queue.clientLastName}
+                          </div>
+                          <div className="patient-id">ID: {queue.clientId}</div>
                         </div>
-                        <div className="patient-id">ID: {queue.clientId}</div>
                       </div>
                     </div>
                   </div>
-                  <div className="appointment-actions">
-                    <button className="action-btn complete">Complete Treatment</button>
-                    <button className="action-btn reschedule">Reschedule</button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
