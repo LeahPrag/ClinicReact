@@ -16,7 +16,6 @@ const initialState: ClientState = {
   error: null,
 }
 
-// Async thunks עם טיפוס Generic מתאים
 export const fetchClients = createAsyncThunk<M_Client[]>(
   "client/fetchClients",
   async () => {
@@ -68,7 +67,6 @@ const clientSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch clients
       .addCase(fetchClients.pending, (state) => {
         state.loading = true
         state.error = null
@@ -81,15 +79,12 @@ const clientSlice = createSlice({
         state.loading = false
         state.error = action.error.message || "Failed to fetch clients"
       })
-      // Fetch client by ID
       .addCase(fetchClientById.fulfilled, (state, action) => {
         state.currentClient = action.payload
       })
-      // Add client
       .addCase(addClient.fulfilled, (state, action) => {
         state.clients.push(action.payload)
       })
-      // Update client
       .addCase(updateClient.fulfilled, (state, action) => {
         const index = state.clients.findIndex((c) => c.idNumber === action.payload.idNumber)
         if (index !== -1) {
@@ -99,7 +94,6 @@ const clientSlice = createSlice({
           state.currentClient = action.payload
         }
       })
-      // Delete client
       .addCase(deleteClient.fulfilled, (state, action) => {
         state.clients = state.clients.filter((c) => c.idNumber !== action.payload)
         if (state.currentClient?.idNumber === action.payload) {

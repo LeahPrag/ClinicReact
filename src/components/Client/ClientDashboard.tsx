@@ -8,16 +8,16 @@ import {
   fetchAvailableQueuesForSpecialization,
   fetchAvailableQueuesForDate,
   makeAppointment,
-  fetchClientAppointments // ✅ הוספתי את ה-thunk החדש
+  fetchClientAppointments,
 } from "../../slices/queueSlice";
 import Layout from "../Layout/Layout";
 import "./ClientDashboard.css";
 
 const specializations = [
-  { value: "Gynecologist", label: "גינקולוגיה" },
-  { value: "ENT", label: "אף אוזן גרון" },
-  { value: "Pediatrician", label: "ילדים" },
-  { value: "Adult", label: "מבוגרים" },
+  { value: "Gynecologist", label: "Gynecology" },
+  { value: "ENT", label: "ENT" },
+  { value: "Pediatrician", label: "Pediatrics" },
+  { value: "Adult", label: "Adults" },
 ];
 
 const ClientDashboard: React.FC = () => {
@@ -39,7 +39,7 @@ const ClientDashboard: React.FC = () => {
 
   useEffect(() => {
     if (user?.id) {
-      dispatch(fetchClientAppointments(user.id)); // ✅ שליפת התורים של הלקוח
+      dispatch(fetchClientAppointments(user.id));
     }
   }, [dispatch, user?.id]);
 
@@ -92,9 +92,9 @@ const ClientDashboard: React.FC = () => {
       } else {
         dispatch(fetchAvailableQueuesForToday());
       }
-      dispatch(fetchClientAppointments(user.id)); // ✅ רענון התורים של הלקוח אחרי קביעת תור
+      dispatch(fetchClientAppointments(user.id));
     } catch (error: any) {
-      alert(`שגיאה בקביעת התור: ${error.message}`);
+      alert(`Error making appointment: ${error.message}`);
     } finally {
       setSelectedQueue(null);
     }
@@ -104,14 +104,14 @@ const ClientDashboard: React.FC = () => {
     <Layout title={`Welcome, ${user?.name}`}>
       <div className="client-dashboard" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <section className="welcome-section glass-card" style={{ padding: "1rem" }}>
-          <h2>שלום {user?.name}</h2>
-          <p>כאן תוכל לקבוע תורים ולנהל את הטיפולים שלך</p>
+          <h2>Hello {user?.name}</h2>
+          <p>Here you can schedule appointments and manage your treatments</p>
         </section>
 
         <section className="search-section glass-card" style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
             <div>
-              <label htmlFor="date-select">בחר תאריך:</label>
+              <label htmlFor="date-select">Select Date:</label>
               <input
                 type="date"
                 id="date-select"
@@ -122,7 +122,7 @@ const ClientDashboard: React.FC = () => {
             </div>
 
             <button onClick={() => setShowDoctorFields((v) => !v)} style={{ padding: "6px 12px", cursor: "pointer" }}>
-              {showDoctorFields ? "הסתר שדות רופא" : "חפש לפי שם רופא"}
+              {showDoctorFields ? "Hide Doctor Fields" : "Search by Doctor Name"}
             </button>
 
             <button
@@ -130,7 +130,7 @@ const ClientDashboard: React.FC = () => {
               disabled={!selectedDate}
               style={{ padding: "6px 12px", cursor: selectedDate ? "pointer" : "not-allowed" }}
             >
-              חפש
+              Search
             </button>
           </div>
 
@@ -138,14 +138,14 @@ const ClientDashboard: React.FC = () => {
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: 8 }}>
               <input
                 type="text"
-                placeholder="שם פרטי של רופא"
+                placeholder="Doctor's First Name"
                 value={doctorFirstName}
                 onChange={(e) => setDoctorFirstName(e.target.value)}
                 style={{ padding: 6, flex: "1 1 200px" }}
               />
               <input
                 type="text"
-                placeholder="שם משפחה של רופא"
+                placeholder="Doctor's Last Name"
                 value={doctorLastName}
                 onChange={(e) => setDoctorLastName(e.target.value)}
                 style={{ padding: 6, flex: "1 1 200px" }}
@@ -154,14 +154,14 @@ const ClientDashboard: React.FC = () => {
           )}
 
           <div>
-            <label htmlFor="specialization-select">בחר התמחות:</label>
+            <label htmlFor="specialization-select">Select Specialization:</label>
             <select
               id="specialization-select"
               value={selectedSpecialization ?? ""}
               onChange={(e) => setSelectedSpecialization(e.target.value || null)}
               style={{ marginLeft: 8, padding: 6, minWidth: 150 }}
             >
-              <option value="">כל ההתמחויות</option>
+              <option value="">All Specializations</option>
               {specializations.map((spec) => (
                 <option key={spec.value} value={spec.value}>
                   {spec.label}
@@ -174,25 +174,25 @@ const ClientDashboard: React.FC = () => {
         <section className="available-queues-section glass-card" style={{ padding: "1rem", maxHeight: "350px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <h3 style={{ marginBottom: "0.5rem" }}>
             {selectedSpecialization
-              ? `תורים זמינים - ${specializations.find((s) => s.value === selectedSpecialization)?.label || selectedSpecialization}`
-              : "תורים זמינים"}
-            {selectedDate && ` - ${new Date(selectedDate).toLocaleDateString("he-IL")}`}
+              ? `Available Appointments - ${specializations.find((s) => s.value === selectedSpecialization)?.label || selectedSpecialization}`
+              : "Available Appointments"}
+            {selectedDate && ` - ${new Date(selectedDate).toLocaleDateString("en-US")}`}
           </h3>
 
           {loading ? (
-            <p>טוען תורים זמינים...</p>
+            <p>Loading available appointments...</p>
           ) : availableQueues.length === 0 ? (
-            <p>אין תורים זמינים כרגע</p>
+            <p>No available appointments</p>
           ) : (
             availableQueues.map((queue) => (
               <div key={queue.queueId} style={{ border: "1px solid #ccc", padding: "0.5rem", borderRadius: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div>
-                    <strong>תאריך:</strong> {new Date(queue.appointmentDate).toLocaleDateString("he-IL")} <strong>שעה:</strong>{" "}
-                    {new Date(queue.appointmentDate).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                    <strong>Date:</strong> {new Date(queue.appointmentDate).toLocaleDateString("en-US")} <strong>Time:</strong>{" "}
+                    {new Date(queue.appointmentDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                   <div>
-                    <strong>רופא מס':</strong> {queue.doctorId} | <strong>תור מס':</strong> {queue.queueId}
+                    <strong>Doctor ID:</strong> {queue.doctorId} | <strong>Queue ID:</strong> {queue.queueId}
                   </div>
                 </div>
                 <button
@@ -200,7 +200,7 @@ const ClientDashboard: React.FC = () => {
                   onClick={() => handleMakeAppointment(queue.queueId, queue.doctorId, queue.appointmentDate)}
                   style={{ padding: "6px 12px", cursor: selectedQueue === queue.queueId ? "not-allowed" : "pointer", backgroundColor: "#4caf50", color: "white", border: "none", borderRadius: 4 }}
                 >
-                  {selectedQueue === queue.queueId ? "מזמין..." : "קבע תור"}
+                  {selectedQueue === queue.queueId ? "Booking..." : "Book Appointment"}
                 </button>
               </div>
             ))
@@ -208,19 +208,19 @@ const ClientDashboard: React.FC = () => {
         </section>
 
         <section className="my-appointments-section glass-card" style={{ padding: "1rem" }}>
-          <h3>התורים שלי</h3>
+          <h3>My Appointments</h3>
           <div style={{ border: "1px dashed #aaa", borderRadius: 6, padding: "1rem", textAlign: "center", color: "#777" }}>
             {clientAppointments.length === 0 ? (
-              <p>אין תורים שנקבעו</p>
+              <p>No appointments scheduled</p>
             ) : (
               clientAppointments.map((appointment) => (
                 <div key={appointment.queueId} style={{ border: "1px solid #ccc", padding: "0.5rem", borderRadius: 6, marginBottom: "0.5rem" }}>
                   <div>
-                    <strong>תאריך:</strong> {new Date(appointment.appointmentDate).toLocaleDateString("he-IL")} <strong>שעה:</strong>{" "}
-                    {new Date(appointment.appointmentDate).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                    <strong>Date:</strong> {new Date(appointment.appointmentDate).toLocaleDateString("en-US")} <strong>Time:</strong>{" "}
+                    {new Date(appointment.appointmentDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                   <div>
-                    <strong>רופא מס':</strong> {appointment.doctorId} | <strong>תור מס':</strong> {appointment.queueId}
+                    <strong>Doctor ID:</strong> {appointment.doctorId} | <strong>Queue ID:</strong> {appointment.queueId}
                   </div>
                 </div>
               ))

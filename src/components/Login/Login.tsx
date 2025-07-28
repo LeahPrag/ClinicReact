@@ -16,30 +16,30 @@ const Login: React.FC = () => {
     setError("")
 
     if (!idNumber.trim()) {
-      setError("אנא הכנס תעודת זהות")
+      setError("Please enter an ID number")
       return
     }
 
     const success = await login(idNumber.trim())
     if (!success) {
-      setError("תעודת זהות לא נמצאה במערכת")
+      setError("ID number not found in the system")
     }
   }
 
   return (
-    <Layout title="כניסה למערכת">
+    <Layout title="System Login">
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
             <div className="login-logo">🏥</div>
-            <h2 className="login-title">כניסה למערכת</h2>
-            <p className="login-subtitle">הכנס את תעודת הזהות שלך</p>
+            <h2 className="login-title">System Login</h2>
+            <p className="login-subtitle">Enter your ID number</p>
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="input-group">
               <label htmlFor="idNumber" className="input-label">
-                תעודת זהות
+                ID Number
               </label>
               <input
                 type="text"
@@ -47,7 +47,7 @@ const Login: React.FC = () => {
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
                 className="login-input"
-                placeholder="הכנס תעודת זהות"
+                placeholder="Enter ID number"
                 disabled={isLoading}
               />
             </div>
@@ -63,28 +63,28 @@ const Login: React.FC = () => {
               {isLoading ? (
                 <div className="loading-spinner">
                   <div className="spinner"></div>
-                  <span>מתחבר...</span>
+                  <span>Connecting...</span>
                 </div>
               ) : (
-                "כניסה"
+                "Login"
               )}
             </button>
           </form>
 
           <div className="login-info">
-            <h3>סוגי משתמשים:</h3>
+            <h3>User Types:</h3>
             <div className="user-types">
               <div className="user-type-card">
                 <span className="user-type-icon">👨‍⚕️</span>
-                <span>רופא</span>
+                <span>Doctor</span>
               </div>
               <div className="user-type-card">
                 <span className="user-type-icon">👤</span>
-                <span>מטופל</span>
+                <span>Patient</span>
               </div>
               <div className="user-type-card">
                 <span className="user-type-icon">👩‍💼</span>
-                <span>מזכירה</span>
+                <span>Secretary</span>
               </div>
             </div>
           </div>

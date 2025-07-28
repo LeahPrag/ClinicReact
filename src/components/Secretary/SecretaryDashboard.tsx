@@ -74,14 +74,14 @@ const SecretaryDashboard: React.FC = () => {
   }
 
   const handleDeleteDoctor = async (id: string) => {
-    if (window.confirm("האם אתה בטוח שברצונך למחוק את הרופא?")) {
+    if (window.confirm("Are you sure you want to delete this doctor?")) {
       await dispatch(deleteDoctor(id))
       await dispatch(fetchAllDoctors())
     }
   }
 
   const handleDeleteClient = async (id: string) => {
-    if (window.confirm("האם אתה בטוח שברצונך למחוק את המטופל?")) {
+    if (window.confirm("Are you sure you want to delete this client?")) {
       await dispatch(deleteClient(id))
       await dispatch(fetchClients())
     }
@@ -100,11 +100,11 @@ const SecretaryDashboard: React.FC = () => {
   }
 
   return (
-    <Layout title="לוח בקרה - מזכירה">
+    <Layout title="Secretary Dashboard">
       <div className="secretary-dashboard">
         <div className="dashboard-header">
           <h2>Hello {user?.name}</h2>
-          <p>ניהול רופאים ומטופלים</p>
+          <p>Manage Doctors and Clients</p>
         </div>
         <button
           className="add-btn"
@@ -114,20 +114,20 @@ const SecretaryDashboard: React.FC = () => {
               const res = await dispatch(addQueues()).unwrap()
               alert("✔️ " + res)
             } catch (err) {
-              alert("❌ שגיאה בהוספת תורים")
+              alert("❌ Error adding queues")
             }
           }}
         >
-          ➕ צור תורים עתידיים
+          ➕ Create Future Queues
         </button>
 
         <div className="tabs-container">
           <div className="tabs">
             <button className={`tab ${activeTab === "doctors" ? "active" : ""}`} onClick={() => setActiveTab("doctors")}>
-              👨‍⚕️ רופאים ({doctors.length})
+              👨‍⚕️ Doctors ({doctors.length})
             </button>
             <button className={`tab ${activeTab === "clients" ? "active" : ""}`} onClick={() => setActiveTab("clients")}>
-              👤 מטופלים ({clients.length})
+              👤 Clients ({clients.length})
             </button>
           </div>
 
@@ -141,7 +141,7 @@ const SecretaryDashboard: React.FC = () => {
               setNewClient({ firstName: "", lastName: "", phone: "", email: "", address: "", idNumber: "" })
             }
           }}>
-            ➕ הוסף {activeTab === "doctors" ? "רופא" : "מטופל"}
+            ➕ Add {activeTab === "doctors" ? "Doctor" : "Client"}
           </button>
         </div>
 
@@ -149,52 +149,52 @@ const SecretaryDashboard: React.FC = () => {
           <div className="modal-overlay">
             <div className="modal">
               <div className="modal-header">
-                <h3>{editMode || editingClient ? "עריכה" : `הוסף ${activeTab === "doctors" ? "רופא חדש" : "מטופל חדש"}`}</h3>
+                <h3>{editMode || editingClient ? "Edit" : `Add ${activeTab === "doctors" ? "New Doctor" : "New Client"}`}</h3>
                 <button className="close-btn" onClick={() => setShowAddForm(false)}>✕</button>
               </div>
 
               {activeTab === "doctors" ? (
                 <form onSubmit={handleAddDoctor} className="add-form">
-                  <div className="form-group"><label>שם פרטי</label>
+                  <div className="form-group"><label>First Name</label>
                     <input type="text" value={newDoctor.firstName} onChange={(e) => setNewDoctor({ ...newDoctor, firstName: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>שם משפחה</label>
+                  <div className="form-group"><label>Last Name</label>
                     <input type="text" value={newDoctor.lastName} onChange={(e) => setNewDoctor({ ...newDoctor, lastName: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>התמחות</label>
+                  <div className="form-group"><label>Specialization</label>
                     <input type="text" value={newDoctor.specialization} onChange={(e) => setNewDoctor({ ...newDoctor, specialization: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>תעודת זהות</label>
+                  <div className="form-group"><label>ID Number</label>
                     <input type="text" value={newDoctor.idNumber} onChange={(e) => setNewDoctor({ ...newDoctor, idNumber: e.target.value })} required disabled={editMode} />
                   </div>
                   <div className="form-actions">
-                    <button type="submit" className="submit-btn">{editMode ? "שמור שינויים" : "הוסף רופא"}</button>
-                    <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>ביטול</button>
+                    <button type="submit" className="submit-btn">{editMode ? "Save Changes" : "Add Doctor"}</button>
+                    <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
                   </div>
                 </form>
               ) : (
                 <form onSubmit={handleAddClient} className="add-form">
-                  <div className="form-group"><label>שם פרטי</label>
+                  <div className="form-group"><label>First Name</label>
                     <input type="text" value={newClient.firstName} onChange={(e) => setNewClient({ ...newClient, firstName: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>שם משפחה</label>
+                  <div className="form-group"><label>Last Name</label>
                     <input type="text" value={newClient.lastName} onChange={(e) => setNewClient({ ...newClient, lastName: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>טלפון</label>
+                  <div className="form-group"><label>Phone</label>
                     <input type="tel" value={newClient.phone} onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })} />
                   </div>
-                  <div className="form-group"><label>אימייל</label>
+                  <div className="form-group"><label>Email</label>
                     <input type="email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })} />
                   </div>
-                  <div className="form-group"><label>כתובת</label>
+                  <div className="form-group"><label>Address</label>
                     <input type="text" value={newClient.address} onChange={(e) => setNewClient({ ...newClient, address: e.target.value })} required />
                   </div>
-                  <div className="form-group"><label>תעודת זהות</label>
+                  <div className="form-group"><label>ID Number</label>
                     <input type="text" value={newClient.idNumber} onChange={(e) => setNewClient({ ...newClient, idNumber: e.target.value })} required disabled={editingClient} />
                   </div>
                   <div className="form-actions">
-                    <button type="submit" className="submit-btn">{editingClient ? "שמור שינויים" : "הוסף מטופל"}</button>
-                    <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>ביטול</button>
+                    <button type="submit" className="submit-btn">{editingClient ? "Save Changes" : "Add Client"}</button>
+                    <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
                   </div>
                 </form>
               )}
@@ -206,18 +206,18 @@ const SecretaryDashboard: React.FC = () => {
           {activeTab === "doctors" ? (
             <div className="items-grid">
               {doctorsLoading ? (
-                <span>טוען רופאים...</span>
+                <span>Loading doctors...</span>
               ) : (
                 doctors.map((doctor) => (
                   <div key={doctor.idNumber} className="item-card doctor-card">
                     <div className="item-info">
                       <h4>{doctor.firstName} {doctor.lastName}</h4>
                       <p>{doctor.specialization}</p>
-                      <p>ת.ז: {doctor.idNumber}</p>
+                      <p>ID: {doctor.idNumber}</p>
                     </div>
                     <div className="item-actions">
-                      <button className="edit-btn" onClick={() => startEditDoctor(doctor)}>✏️ עריכה</button>
-                      <button className="delete-btn" onClick={() => handleDeleteDoctor(doctor.idNumber)}>🗑️ מחיקה</button>
+                      <button className="edit-btn" onClick={() => startEditDoctor(doctor)}>✏️ Edit</button>
+                      <button className="delete-btn" onClick={() => handleDeleteDoctor(doctor.idNumber)}>🗑️ Delete</button>
                     </div>
                   </div>
                 ))
@@ -226,20 +226,20 @@ const SecretaryDashboard: React.FC = () => {
           ) : (
             <div className="items-grid">
               {clientsLoading ? (
-                <span>טוען מטופלים...</span>
+                <span>Loading clients...</span>
               ) : (
                 clients.map((client) => (
                   <div key={client.idNumber} className="item-card client-card">
                     <div className="item-info">
                       <h4>{client.firstName} {client.lastName}</h4>
-                      <p>📞 {client.phone || "לא צוין"}</p>
-                      <p>📧 {client.email || "לא צוין"}</p>
+                      <p>📞 {client.phone || "Not provided"}</p>
+                      <p>📧 {client.email || "Not provided"}</p>
                       <p>🏠 {client.address}</p>
-                      <p>ת.ז: {client.idNumber}</p>
+                      <p>ID: {client.idNumber}</p>
                     </div>
                     <div className="item-actions">
-                      <button className="edit-btn" onClick={() => startEditClient(client)}>✏️ עריכה</button>
-                      <button className="delete-btn" onClick={() => handleDeleteClient(client.idNumber)}>🗑️ מחיקה</button>
+                      <button className="edit-btn" onClick={() => startEditClient(client)}>✏️ Edit</button>
+                      <button className="delete-btn" onClick={() => handleDeleteClient(client.idNumber)}>🗑️ Delete</button>
                     </div>
                   </div>
                 ))

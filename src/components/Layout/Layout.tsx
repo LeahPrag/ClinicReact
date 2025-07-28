@@ -19,13 +19,13 @@ const Layout: React.FC<LayoutProps> = ({ title, children, backgroundStyle }) => 
       <div className="layout-wrapper" style={backgroundStyle}>
         <header className="layout-header">
           <div className="header-content">
-            <h1 className="header-title">🩺 מערכת ניהול מרפאה</h1>
+            <h1 className="header-title">🩺 Clinic Management System</h1>
             {user && (
               <div className="user-info">
-                <span className="user-name">Hello, {user.name }</span>
+                <span className="user-name">Hello {user.name}</span>
                 <span className="user-type">({user.type})</span>
                 <button onClick={logout} className="logout-btn">
-                  יציאה
+                  Logout
                 </button>
               </div>
             )}
@@ -36,7 +36,7 @@ const Layout: React.FC<LayoutProps> = ({ title, children, backgroundStyle }) => 
           {children}
         </main>
         <footer className="layout-footer">
-          <p>© 2025 מרפאה</p>
+          <p>© 2025 Clinic</p>
         </footer>
       </div>
     </div>
