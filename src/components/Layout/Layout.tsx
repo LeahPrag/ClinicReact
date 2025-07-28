@@ -22,13 +22,13 @@ const Layout: React.FC<LayoutProps> = ({ title, children, backgroundStyle }) => 
             <h1 className="header-title">🩺 מערכת ניהול מרפאה</h1>
             {user && (
               <div className="user-info">
-                <span className="user-name">שלום, {user.name }</span>
+                <span className="user-name">Hello, {user.name }</span>
                 <span className="user-type">({user.type})</span>
                 <button onClick={logout} className="logout-btn">
                   יציאה
                 </button>
               </div>
-            )}n
+            )}
           </div>
         </header>
         <main className="layout-main">

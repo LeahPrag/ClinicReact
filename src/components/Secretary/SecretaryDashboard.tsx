@@ -103,7 +103,7 @@ const SecretaryDashboard: React.FC = () => {
     <Layout title="לוח בקרה - מזכירה">
       <div className="secretary-dashboard">
         <div className="dashboard-header">
-          <h2>שלום {user?.name}</h2>
+          <h2>Hello {user?.name}</h2>
           <p>ניהול רופאים ומטופלים</p>
         </div>
         <button

@@ -186,6 +186,15 @@ class ApiService {
 
     return await response.json()
   }
+  async getClientQueues(clientId: string): Promise<M_ClinicQueue[]> {
+    const url = `${API_BASE_URL}/Clinic/GetClientQueues?clientId=${clientId}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to fetch client queues");
+    }
+    return await response.json();
+  }
   async addQueues(): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/Clinic/addQueues`, {
     method: "POST",

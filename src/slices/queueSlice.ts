@@ -1,4 +1,3 @@
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { M_AvailableQueue, M_ClinicQueue } from "../types"
 import { apiService } from "../services/api"
@@ -6,6 +5,7 @@ import { apiService } from "../services/api"
 interface QueueState {
   availableQueues: M_AvailableQueue[]
   todayQueues: M_ClinicQueue[]
+  clientAppointments: M_ClinicQueue[] 
   loading: boolean
   error: string | null
 }
@@ -13,11 +13,11 @@ interface QueueState {
 const initialState: QueueState = {
   availableQueues: [],
   todayQueues: [],
+  clientAppointments: [], 
   loading: false,
   error: null,
 }
 
-// Async thunks עם טיפוסים מתאימים
 export const fetchAvailableQueuesForToday = createAsyncThunk<M_AvailableQueue[]>(
   "queue/fetchAvailableQueuesForToday",
   async () => {
@@ -25,7 +25,6 @@ export const fetchAvailableQueuesForToday = createAsyncThunk<M_AvailableQueue[]>
   }
 )
 
-// thunk חדש לפי התמחות
 export const fetchAvailableQueuesForSpecialization = createAsyncThunk<M_AvailableQueue[], string>(
   "queue/fetchAvailableQueuesForSpecialization",
   async (specialization: string) => {
@@ -46,6 +45,7 @@ export const addQueues = createAsyncThunk<string>(
     return await apiService.addQueues()
   }
 )
+
 export const fetchAvailableQueuesForDate = createAsyncThunk<
   M_AvailableQueue[],
   {
@@ -62,6 +62,13 @@ export const fetchAvailableQueuesForDate = createAsyncThunk<
       lastName
     );
   }
+)
+
+export const fetchClientAppointments = createAsyncThunk<M_ClinicQueue[], string>(
+  "queue/fetchClientAppointments",
+  async (clientId) => {
+    return await apiService.getClientQueues(clientId);
+  }
 );
 
 const queueSlice = createSlice({
@@ -74,7 +81,6 @@ const queueSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch available queues for today
       .addCase(fetchAvailableQueuesForToday.pending, (state) => {
         state.loading = true
         state.error = null
@@ -88,7 +94,6 @@ const queueSlice = createSlice({
         state.error = action.error.message || "Failed to fetch available queues"
       })
 
-      // Fetch available queues by specialization
       .addCase(fetchAvailableQueuesForSpecialization.pending, (state) => {
         state.loading = true
         state.error = null
@@ -103,11 +108,10 @@ const queueSlice = createSlice({
         state.error = action.error.message || "Failed to fetch available queues by specialization"
       })
 
-      // Make appointment
       .addCase(makeAppointment.fulfilled, (state) => {
         state.loading = false
       })
-      // Add this to your extraReducers in queueSlice.ts
+
       .addCase(fetchAvailableQueuesForDate.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -120,23 +124,34 @@ const queueSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to fetch queues by date";
       })
+
       .addCase(addQueues.pending, (state) => {
         state.loading = true
         state.error = null
       })
-    .addCase(addQueues.fulfilled, (state, action) => {
-      state.loading = false
-      // אפשר אולי להוסיף הודעה אם רוצים:
-      console.log("Queues added:", action.payload)
-    })
-    .addCase(addQueues.rejected, (state, action) => {
-      state.loading = false
-      state.error = action.error.message || "Failed to add queues"
-    });
+      .addCase(addQueues.fulfilled, (state, action) => {
+        state.loading = false
+        console.log("Queues added:", action.payload)
+      })
+      .addCase(addQueues.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || "Failed to add queues"
+      })
 
-},
+      .addCase(fetchClientAppointments.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchClientAppointments.fulfilled, (state, action) => {
+        state.loading = false;
+        state.clientAppointments = action.payload;
+      })
+      .addCase(fetchClientAppointments.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch client appointments";
+      });
+  },
 })
 
 export const { clearError } = queueSlice.actions
 export default queueSlice.reducer
-
