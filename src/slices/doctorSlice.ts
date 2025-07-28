@@ -50,7 +50,6 @@ export const addDoctor = createAsyncThunk<M_Doctor, M_Doctor>(
   }
 )
 
-
 export const deleteDoctor = createAsyncThunk<string, string>(
   "doctor/deleteDoctor",
   async (id) => {
@@ -64,6 +63,16 @@ export const updateDoctor = createAsyncThunk<M_Doctor, UpdateDoctorDto>(
   async (updatedDoctor) => {
     const updated = await apiService.updateDoctor(updatedDoctor)
     return updated as M_Doctor
+  }
+)
+
+export const deleteADayOfWork = createAsyncThunk<
+  void,
+  { idNumber: string; day: string }
+>(
+  "doctor/deleteADayOfWork",
+  async ({ idNumber, day }) => {
+    await apiService.deleteADayOfWork(idNumber, day)
   }
 )
 
@@ -93,27 +102,48 @@ const doctorSlice = createSlice({
         state.loading = false
         state.error = action.error.message || "Failed to fetch doctors"
       })
+
       // Fetch doctor queues for today
       .addCase(fetchDoctorQueuesForToday.fulfilled, (state, action) => {
         state.todayQueues = action.payload
       })
+
       // Fetch number of clients for today
       .addCase(fetchNumOfClientsForToday.fulfilled, (state, action) => {
         state.clientsCount = action.payload
       })
+
       // Add doctor
       .addCase(addDoctor.fulfilled, (state, action) => {
         state.doctors.push(action.payload)
       })
+
       // Delete doctor
       .addCase(deleteDoctor.fulfilled, (state, action) => {
         state.doctors = state.doctors.filter((d) => d.idNumber !== action.payload)
       })
+
+      // Update doctor
       .addCase(updateDoctor.fulfilled, (state, action) => {
         const index = state.doctors.findIndex((d) => d.idNumber === action.payload.idNumber)
         if (index !== -1) {
           state.doctors[index] = action.payload
         }
+      })
+
+      // Delete day of work
+      .addCase(deleteADayOfWork.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteADayOfWork.fulfilled, (state) => {
+        state.loading = false
+        state.todayQueues = []
+        state.clientsCount = 0
+      })
+      .addCase(deleteADayOfWork.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || "Failed to delete work day"
       })
   },
 })

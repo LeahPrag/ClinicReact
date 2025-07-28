@@ -244,7 +244,64 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+.delete-day-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
 
+.delete-day-container label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.delete-day-container input[type="date"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  direction: ltr;
+  min-width: 160px;
+}
+
+.delete-day-btn {
+  background: linear-gradient(135deg, #e53935, #d32f2f);
+  color: white;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.delete-day-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(229, 57, 53, 0.3);
+}
+
+.action-btn.complete {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.action-btn.complete:hover {
+  background-color: #388e3c;
+}
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -272,3 +329,4 @@
     flex-direction: column;
   }
 }
+

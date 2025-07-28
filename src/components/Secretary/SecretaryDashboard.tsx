@@ -1,4 +1,5 @@
 "use client"
+import { addQueues } from "../../slices/queueSlice"
 
 import type React from "react"
 import { useEffect, useState } from "react"
@@ -44,7 +45,7 @@ const SecretaryDashboard: React.FC = () => {
     e.preventDefault()
     if (newDoctor.firstName && newDoctor.lastName && newDoctor.specialization && newDoctor.idNumber) {
       console.log('Adding doctor:', newDoctor);
-      
+
       if (editMode) {
         await dispatch(updateDoctor(newDoctor as M_Doctor))
       } else {
@@ -105,6 +106,20 @@ const SecretaryDashboard: React.FC = () => {
           <h2>שלום {user?.name}</h2>
           <p>ניהול רופאים ומטופלים</p>
         </div>
+        <button
+          className="add-btn"
+          style={{ background: "linear-gradient(135deg, #4caf50, #2e7d32)" }}
+          onClick={async () => {
+            try {
+              const res = await dispatch(addQueues()).unwrap()
+              alert("✔️ " + res)
+            } catch (err) {
+              alert("❌ שגיאה בהוספת תורים")
+            }
+          }}
+        >
+          ➕ צור תורים עתידיים
+        </button>
 
         <div className="tabs-container">
           <div className="tabs">

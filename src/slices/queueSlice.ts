@@ -40,10 +40,15 @@ export const makeAppointment = createAsyncThunk<
   return await apiService.makeAppointment(idDoctor, idClient, date, hour)
 })
 
-
+export const addQueues = createAsyncThunk<string>(
+  "queue/addQueues",
+  async () => {
+    return await apiService.addQueues()
+  }
+)
 export const fetchAvailableQueuesForDate = createAsyncThunk<
   M_AvailableQueue[],
-  { 
+  {
     date: string;
     firstName?: string;
     lastName?: string;
@@ -114,9 +119,22 @@ const queueSlice = createSlice({
       .addCase(fetchAvailableQueuesForDate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch queues by date";
-      });
-      
-  },
+      })
+      .addCase(addQueues.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+    .addCase(addQueues.fulfilled, (state, action) => {
+      state.loading = false
+      // אפשר אולי להוסיף הודעה אם רוצים:
+      console.log("Queues added:", action.payload)
+    })
+    .addCase(addQueues.rejected, (state, action) => {
+      state.loading = false
+      state.error = action.error.message || "Failed to add queues"
+    });
+
+},
 })
 
 export const { clearError } = queueSlice.actions

@@ -4,7 +4,11 @@ import type React from "react"
 import { useEffect } from "react"
 import { useUser } from "../../contexts/UserContext"
 import { useAppDispatch, useAppSelector } from "../../hooks/redux"
-import { fetchDoctorQueuesForToday, fetchNumOfClientsForToday } from "../../slices/doctorSlice"
+import {
+  fetchDoctorQueuesForToday,
+  fetchNumOfClientsForToday,
+  deleteADayOfWork
+} from "../../slices/doctorSlice"
 import Layout from "../Layout/Layout"
 import "./DoctorDashboard.css"
 
@@ -12,6 +16,22 @@ const DoctorDashboard: React.FC = () => {
   const { user } = useUser()
   const dispatch = useAppDispatch()
   const { todayQueues, clientsCount, loading } = useAppSelector((state) => state.doctor)
+
+  const handleDeleteDay = async () => {
+    const confirmed = window.confirm("האם את/ה בטוח/ה שברצונך למחוק את יום העבודה הזה?");
+    if (!confirmed || !user?.id) return;
+
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    try {
+      await dispatch(deleteADayOfWork({ idNumber: user.id, day: today })).unwrap();
+      alert("היום נמחק בהצלחה!");
+      dispatch(fetchDoctorQueuesForToday(user.id));
+      dispatch(fetchNumOfClientsForToday(user.id));
+    } catch (error) {
+      alert("אירעה שגיאה בעת מחיקת היום: " + (error as Error).message);
+    }
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -39,6 +59,13 @@ const DoctorDashboard: React.FC = () => {
         <div className="stats-grid">
           <div className="stat-card clients-today">
             <div className="stat-icon">👥</div>
+            <button
+              onClick={handleDeleteDay}
+              className="action-btn complete"
+              style={{ background: "linear-gradient(135deg, #e53935, #d32f2f)", color: "white" }}
+            >
+              מחיקת יום עבודה
+            </button>
             <div className="stat-content">
               <h3>מטופלים היום</h3>
               <div className="stat-number">{clientsCount}</div>
